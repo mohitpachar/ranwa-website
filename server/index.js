@@ -8,7 +8,6 @@ const path = require('path');
 
 
 const app = express();
-app.use(express.static(path.join(__dirname, '../public')));
 const PORT = process.env.PORT || 3000;
 
 const dbPath = path.join(__dirname, '../database.db');
@@ -82,6 +81,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
+
+app.get('/health', (req, res) => {
+  res.status(200).send('Server is healthy');
+});
 
 const ADMIN_KEY = () => process.env.ADMIN_KEY || 'ranwa2024admin';
 const checkAdmin = (req, res) => {

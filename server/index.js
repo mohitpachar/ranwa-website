@@ -219,21 +219,12 @@ app.get('/api/admin/stats', async (req, res) => {
     }});
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
-
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/admin.html'));
-});
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
-
 app.get('/health', (req, res) => {
   res.send('OK');
 });
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+app.get('/', (req, res) => {
+  res.send('Website working');
 });
 
 app.listen(PORT, '0.0.0.0', () => {

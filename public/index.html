@@ -890,7 +890,7 @@
         <div class="label">Years Experience</div>
       </div>
       <div class="hero-stat">
-        <div class="num">10</div>
+        <div class="num">8</div>
         <div class="label">Services</div>
       </div>
       <div class="hero-stat">
@@ -991,13 +991,7 @@
         </div>
         <div class="form-group">
           <label>Mobile Number *</label>
-          <input 
-                type="tel"
-                name="phone"
-                placeholder="8955414396"
-                pattern="[0-9]{10}"
-                maxlength="10"
-                required/>
+          <input type="tel" name="phone" placeholder="8955414396" required />
         </div>
         <div class="form-group">
           <label>Email Address</label>
@@ -1021,17 +1015,12 @@
           <input type="date" name="event_date" id="eventDateInput" style="color-scheme:dark;cursor:pointer;" />
         </div>
         <div class="form-group">
-          <label>No. of Guests (approx.)</label>
+          <label>No. of Guests (approx.) *</label>
           <input type="number" name="guests" placeholder="e.g. 200" min="1" />
         </div>
         <div class="form-group form-full">
           <label>Venue / Location *</label>
-          <input 
-            type="text" 
-            name="venue" 
-            placeholder="Venue ka naam ya address..." 
-            required
-          />
+          <input type="text" name="venue" id="venueInput" placeholder="Venue ka naam ya address (required) *" />
         </div>
         <div class="form-group form-full">
           <label>Services Chahiye (select all that apply)</label>
@@ -1061,7 +1050,21 @@
   </div>
 </section>
 
-
+<!-- Testimonials -->
+<section id="testimonials">
+  <div class="section-header reveal">
+    <div class="section-tag">Customer Reviews</div>
+    <h2 class="section-title">Log Kya <span>Kehte Hain</span></h2>
+    <div class="section-line"></div>
+    <p class="section-desc">Hamare happy customers ki sacchi reviews</p>
+  </div>
+  <div class="testimonials-grid reveal" id="testimonialsGrid">
+    <!-- loaded dynamically -->
+  </div>
+  <div class="review-btn-wrap reveal">
+    <button class="btn-primary" onclick="openModal()">⭐ Apni Review Dein</button>
+  </div>
+</section>
 
 <!-- Gallery -->
 <section id="gallery">
@@ -1080,22 +1083,6 @@
   </div>
   <div class="gallery-grid reveal" id="galleryGrid"></div>
   <p class="gallery-note reveal">📸 Aur photos ke liye hamare Instagram pe jaein: <a href="https://www.instagram.com/ranwa_events_churu_/" target="_blank">@ranwa_events_churu_</a></p>
-</section>
-
-<!-- Testimonials -->
-<section id="testimonials">
-  <div class="section-header reveal">
-    <div class="section-tag">Customer Reviews</div>
-    <h2 class="section-title">Log Kya <span>Kehte Hain</span></h2>
-    <div class="section-line"></div>
-    <p class="section-desc">Hamare happy customers ki sacchi reviews</p>
-  </div>
-  <div class="testimonials-grid reveal" id="testimonialsGrid">
-    <!-- loaded dynamically -->
-  </div>
-  <div class="review-btn-wrap reveal">
-    <button class="btn-primary" onclick="openModal()">⭐ Apni Review Dein</button>
-  </div>
 </section>
 
 <!-- Contact -->
@@ -1146,7 +1133,7 @@
           <div class="ci-icon">🕐</div>
           <div class="ci-text">
             <strong>Working Hours</strong>
-            <span>Always Available</span>
+            <span>Roz subah 8 baje se raat 9 baje tak</span>
           </div>
         </div>
       </div>
@@ -1193,11 +1180,7 @@
         <div class="logo-icon">🎪</div>
         <span>Ranwa Events</span>
       </div>
-      <p>
-        Ranwa Tent House & Events, owned and managed by 
-        <strong>Mr. Mukul Ranwa</strong>, is Churu, Rajasthan ka trusted 
-        event decoration partner. Har occasion ko yadgaar banate hain.
-      </p>
+      <p>Churu, Rajasthan ka trusted event decoration partner. Har occasion ko yadgaar banate hain.</p>
       <div class="social-links">
         <a href="https://www.instagram.com/ranwa_events_churu_/" target="_blank" class="social-link">📸</a>
         <a href="https://wa.me/918955414396" target="_blank" class="social-link">💬</a>
@@ -1303,104 +1286,77 @@ async function loadTestimonials() {
   } catch (e) {}
 }
 
-// ── Dynamic Gallery From Database ──
-
-let galleryItems = [];
+// ── Gallery — DB driven via /api/gallery/image/:id ──
+let dbGalleryItems = [];
 
 async function loadGallery() {
-
+  const grid = document.getElementById('galleryGrid');
   try {
-
     const res = await fetch('/api/gallery');
-
     const data = await res.json();
-
     if (data.success) {
-
-      galleryItems = data.data;
-
+      dbGalleryItems = data.data;
       renderGallery('all');
-
+    } else {
+      renderGalleryEmpty();
     }
-
-  } catch (err) {
-
-    console.log('Gallery load error:', err);
-
+  } catch(e) {
+    renderGalleryEmpty();
   }
+}
 
+function renderGalleryEmpty() {
+  // Show beautiful illustrated placeholder cards until real photos are uploaded
+  const placeholders = [
+    { cat:'wedding',  emoji:'💍', title:'Wedding Decoration',  desc:'Mandap, stage, phool sajawat', grad:'linear-gradient(135deg,#7B1C2E,#C9A84C)' },
+    { cat:'tent',     emoji:'⛺', title:'Tent & Shamiana',     desc:'Premium outdoor tent setup',   grad:'linear-gradient(135deg,#2D1505,#7B1C2E)' },
+    { cat:'birthday', emoji:'🎂', title:'Birthday Party',      desc:'Colorful balloon decoration',   grad:'linear-gradient(135deg,#8B6914,#7B1C2E)' },
+    { cat:'tent',     emoji:'✨', title:'LED Lighting',         desc:'Fairy lights & chandelier',     grad:'linear-gradient(135deg,#1A0A00,#C9A84C)' },
+    { cat:'wedding',  emoji:'🌸', title:'Flower Decoration',   desc:'Taaze phoolon ki sajawat',      grad:'linear-gradient(135deg,#4A1A08,#8B6914)' },
+    { cat:'corporate',emoji:'🏢', title:'Corporate Event',     desc:'Professional conference setup', grad:'linear-gradient(135deg,#7B1C2E,#4A1A08)' },
+  ];
+  document.getElementById('galleryGrid').innerHTML = placeholders.map(g => `
+    <div class="gallery-item" data-cat="${g.cat}" style="cursor:default">
+      <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center;background:${g.grad};">
+        <div style="font-size:3.5rem;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4))">${g.emoji}</div>
+        <h4 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1rem;margin:0">${g.title}</h4>
+        <p style="color:rgba(253,246,227,0.65);font-size:.78rem;margin:0">${g.desc}</p>
+        <div style="margin-top:6px;padding:4px 12px;background:rgba(201,168,76,0.2);border:1px solid rgba(201,168,76,0.4);border-radius:20px;font-size:.7rem;color:#E8C97A;letter-spacing:1px">RANWA EVENTS</div>
+      </div>
+    </div>`).join('');
 }
 
 function renderGallery(cat) {
-
-  const items =
-    cat === 'all'
-      ? galleryItems
-      : galleryItems.filter(g => g.category === cat);
-
-  document.getElementById('galleryGrid').innerHTML =
-    items.map(g => `
-
-    <div class="gallery-item">
-
+  const items = cat === 'all' ? dbGalleryItems : dbGalleryItems.filter(g => g.category === cat);
+  if (!items.length) { renderGalleryEmpty(); return; }
+  document.getElementById('galleryGrid').innerHTML = items.map(g => `
+    <div class="gallery-item" data-cat="${g.category || 'wedding'}">
       <img
-        src="${g.image_url}"
-        alt="${g.title}"
-        style="
-          width:100%;
-          height:100%;
-          object-fit:cover;
-          border-radius:12px;
-        "
+        src="/api/gallery/image/${g.id}"
+        alt="${(g.title||'Event Photo').replace(/"/g,'')}"
+        loading="lazy"
+        style="width:100%;height:100%;object-fit:cover;"
+        onerror="this.parentElement.innerHTML='<div style=\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2D1505,#7B1C2E);flex-direction:column;gap:8px;\'><span style=\'font-size:2.5rem\'>🖼️</span><span style=\'color:#C9A84C;font-size:0.85rem\'>Photo</span></div>'"
       />
-
       <div class="gallery-overlay">
-
-        <div style="
-          text-align:center;
-          padding:20px;
-        ">
-
-          <h4 style="
-            color:white;
-            font-size:1.1rem;
-            margin-bottom:8px;
-          ">
-            ${g.title || 'Gallery Image'}
-          </h4>
-
-          <p style="
-            color:#ddd;
-            font-size:0.82rem;
-          ">
-            ${g.description || ''}
-          </p>
-
+        <div style="text-align:center;padding:20px;">
+          <h4 style="color:white;font-size:1.1rem;margin-bottom:6px;">${g.title || 'Event Photo'}</h4>
+          <p style="color:rgba(255,255,255,0.7);font-size:0.82rem;">${g.description || ''}</p>
+          <span style="display:inline-block;margin-top:10px;padding:3px 12px;background:rgba(201,168,76,0.3);border:1px solid rgba(201,168,76,0.6);border-radius:20px;font-size:0.72rem;color:#E8C97A;letter-spacing:1px;">${(g.category||'event').toUpperCase()}</span>
         </div>
-
       </div>
-
     </div>
-
   `).join('');
-
 }
 
 loadGallery();
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
-
   btn.addEventListener('click', () => {
-
-    document.querySelectorAll('.filter-btn')
-      .forEach(b => b.classList.remove('active'));
-
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
     renderGallery(btn.dataset.cat);
-
   });
-
 });
 
 // ── Set min booking date to today ──
@@ -1413,38 +1369,28 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
   const btn = document.getElementById('bookBtn');
   const msg = document.getElementById('bookingMsg');
 
-  // Manual validation
+  // Manual validation — all required fields
   const fd = new FormData(e.target);
-  const name = (fd.get('name') || '').trim();
-  const phone = (fd.get('phone') || '').trim();
-  const event_type = (fd.get('event_type') || '').trim();
-  const event_date = (fd.get('event_date') || '').trim();
-  const venue = (fd.get('venue') || '').trim().toLowerCase();
+  const name      = (fd.get('name')       || '').trim();
+  const phone     = (fd.get('phone')      || '').trim();
+  const event_type= (fd.get('event_type') || '').trim();
+  const event_date= (fd.get('event_date') || '').trim();
+  const venue     = (fd.get('venue')      || '').trim();
+  const guests    = (fd.get('guests')     || '').trim();
 
-  msg.style.display = 'block';
-  if (!name) { msg.className = 'form-message error'; msg.textContent = '⚠️ Kripya apna naam likhein.'; return; }
-  if (!phone || phone.length < 10) { msg.className = 'form-message error'; msg.textContent = '⚠️ Kripya valid mobile number likhein (10 digits).'; return; }
-  if (!event_type) { msg.className = 'form-message error'; msg.textContent = '⚠️ Kripya event type chunein.'; return; }
-  if (!event_date) { msg.className = 'form-message error'; msg.textContent = '⚠️ Kripya event ki date chunein.'; return; }
-  if (!venue) {
-  msg.className = 'form-message error';
-  msg.textContent = '⚠️ Kripya venue/location likhein.';
-  return;
-}
+  const showErr = (txt) => {
+    msg.style.display = 'block';
+    msg.className = 'form-message error';
+    msg.textContent = txt;
+    msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
-// Restrict only Churu bookings
-if (
-  !venue.includes('churu') &&
-  !venue.includes('ratangarh') &&
-  !venue.includes('sardarshahar') &&
-  !venue.includes('taranagar') &&
-  !venue.includes('rajgarh')
-) {
-  msg.className = 'form-message error';
-  msg.textContent =
-    '⚠️ Sirf Churu district ke bookings accept kiye jaate hain.';
-  return;
-}
+  if (!name)                            { showErr('⚠️ Kripya apna naam likhein.'); return; }
+  if (!phone || phone.replace(/\D/g,'').length < 10) { showErr('⚠️ Kripya valid 10-digit mobile number likhein.'); return; }
+  if (!event_type)                      { showErr('⚠️ Kripya event type chunein dropdown se.'); return; }
+  if (!event_date)                      { showErr('⚠️ Kripya event ki date chunein.'); return; }
+  if (!venue)                           { showErr('⚠️ Kripya venue / location ka naam likhein.'); return; }
+  if (!guests || parseInt(guests) < 1)  { showErr('⚠️ Kripya guests ki approximate sankhya likhein.'); return; }
   msg.style.display = 'none';
 
   btn.innerHTML = '<span class="spinner"></span> Submit ho raha hai...';
@@ -1452,7 +1398,7 @@ if (
   btn.disabled = true;
 
   const services = [...document.querySelectorAll('#bookingForm input[type=checkbox]:checked')].map(c => c.value);
-  const body = { name, phone, email: fd.get('email'), event_type, event_date, venue: fd.get('venue'), guests: fd.get('guests'), services, message: fd.get('message') };
+  const body = { name, phone, email: (fd.get('email')||'').trim(), event_type, event_date, venue, guests, services, message: (fd.get('message')||'').trim() };
 
   try {
     const res = await fetch('/api/bookings', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
@@ -1530,6 +1476,20 @@ document.getElementById('reviewForm').addEventListener('submit', async (e) => {
     msg.textContent = 'Error. Baad mein try karein.';
   }
 });
+
+// ── Visitor Tracking ──
+(async function trackVisit() {
+  try {
+    await fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        page: window.location.pathname + window.location.hash,
+        referrer: document.referrer || 'Direct'
+      })
+    });
+  } catch(e) {}
+})();
 
 // Init
 loadServices();

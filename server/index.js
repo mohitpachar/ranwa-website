@@ -217,9 +217,16 @@ app.get('/api/admin/stats', async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
-app.get('*', (req, res) => {
-  if (req.path.startsWith('/admin')) res.sendFile(path.join(__dirname, '../public/admin.html'));
-  else res.sendFile(path.join(__dirname, '../public/index.html'));
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin.html'));
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+app.get('/health', (req, res) => {
+  res.send('OK');
 });
 
 app.listen(PORT, '0.0.0.0', () => {

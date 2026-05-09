@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel | Ranwa Tent House</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Mukta:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #C9A84C; --gold-light: #E8C97A; --maroon: #7B1C2E;
+      --dark: #1A0A00; --cream: #FDF6E3; --white: #FFFDF7;
+      --text: #3D2000; --text-light: #7A5A30;
+      --success: #16a34a; --warning: #d97706; --danger: #dc2626;
+      --info: #2563eb; --sidebar-w: 250px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Mukta', sans-serif; background: #f3f0e8; }
+
+    /* Login */
+    #loginScreen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--dark), #4A1A08);
+    }
+    .login-box {
+      background: var(--cream); border-radius: 20px; padding: 48px 40px;
+      max-width: 400px; width: 90%; text-align: center;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    }
+    .login-box h1 { font-family: 'Playfair Display', serif; color: var(--dark); font-size: 1.8rem; margin: 16px 0 8px; }
+    .login-box p { color: var(--text-light); font-size: 0.9rem; margin-bottom: 28px; }
+    .login-box input {
+      width: 100%; padding: 12px 16px; border: 1.5px solid rgba(201,168,76,0.3);
+      border-radius: 10px; font-family: 'Mukta', sans-serif; font-size: 1rem;
+      margin-bottom: 14px; background: var(--white); color: var(--text);
+    }
+    .login-box input:focus { outline: none; border-color: var(--gold); }
+    .login-box button {
+      width: 100%; padding: 13px; border: none; cursor: pointer;
+      background: linear-gradient(135deg, var(--gold), #8B6914);
+      color: var(--dark); font-weight: 700; font-size: 1rem;
+      border-radius: 10px; font-family: 'Mukta', sans-serif; transition: 0.3s;
+    }
+    .login-box button:hover { transform: translateY(-2px); }
+    .login-error { color: var(--danger); font-size: 0.85rem; margin-top: 10px; }
+
+    /* Admin layout */
+    #adminApp { display: none; }
+    #adminApp.visible { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: var(--sidebar-w); background: var(--dark);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+    .sidebar-logo {
+      padding: 24px 20px; border-bottom: 1px solid rgba(201,168,76,0.15);
+      text-align: center;
+    }
+    .sidebar-logo h2 { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1.1rem; }
+    .sidebar-logo span { color: rgba(201,168,76,0.5); font-size: 0.7rem; letter-spacing: 2px; }
+
+    .sidebar-nav { flex: 1; padding: 16px 0; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 20px; cursor: pointer;
+      color: rgba(253,246,227,0.6); font-size: 0.9rem; font-weight: 600;
+      transition: 0.2s; border-left: 3px solid transparent;
+    }
+    .nav-item:hover { color: var(--gold); background: rgba(201,168,76,0.05); }
+    .nav-item.active { color: var(--gold); background: rgba(201,168,76,0.1); border-left-color: var(--gold); }
+    .nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+    .nav-item .badge {
+      margin-left: auto; background: var(--maroon);
+      color: white; border-radius: 10px; padding: 1px 7px; font-size: 0.72rem;
+    }
+
+    .sidebar-logout {
+      padding: 16px 20px; border-top: 1px solid rgba(201,168,76,0.15);
+    }
+    .sidebar-logout button {
+      width: 100%; padding: 10px; border: 1px solid rgba(201,168,76,0.2);
+      background: transparent; color: rgba(253,246,227,0.6); border-radius: 8px;
+      cursor: pointer; font-family: 'Mukta', sans-serif; transition: 0.2s;
+    }
+    .sidebar-logout button:hover { background: rgba(201,168,76,0.1); color: var(--gold); }
+
+    .main-content {
+      flex: 1; margin-left: var(--sidebar-w);
+      padding: 30px; overflow-y: auto;
+    }
+
+    .main-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 28px;
+    }
+    .main-header h1 { font-family: 'Playfair Display', serif; color: var(--dark); font-size: 1.8rem; }
+    .main-header .date { color: var(--text-light); font-size: 0.85rem; }
+
+    /* Stat Cards */
+    .stat-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px; margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--white); border-radius: 14px; padding: 22px 20px;
+      border: 1px solid rgba(201,168,76,0.12); transition: 0.3s;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(139,69,19,0.1); }
+    .stat-card .sc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .stat-card .sc-icon { font-size: 1.8rem; }
+    .stat-card .sc-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-light); }
+    .stat-card .sc-num { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--dark); font-weight: 700; }
+    .stat-card .sc-sub { font-size: 0.78rem; color: var(--text-light); margin-top: 4px; }
+
+    /* Table */
+    .table-card {
+      background: var(--white); border-radius: 14px;
+      border: 1px solid rgba(201,168,76,0.12);
+      overflow: hidden; margin-bottom: 24px;
+    }
+    .table-header {
+      padding: 18px 22px; border-bottom: 1px solid rgba(201,168,76,0.12);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .table-header h3 { font-family: 'Playfair Display', serif; color: var(--dark); font-size: 1.1rem; }
+
+    .search-input {
+      padding: 8px 14px; border: 1px solid rgba(201,168,76,0.25); border-radius: 20px;
+      font-family: 'Mukta', sans-serif; font-size: 0.85rem; background: var(--cream);
+      color: var(--text); width: 200px;
+    }
+    .search-input:focus { outline: none; border-color: var(--gold); }
+
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      background: var(--cream); padding: 12px 16px; text-align: left;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--text-light);
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+    }
+    .data-table td {
+      padding: 13px 16px; border-bottom: 1px solid rgba(201,168,76,0.08);
+      font-size: 0.88rem; color: var(--text);
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: rgba(201,168,76,0.04); }
+
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 0.75rem; font-weight: 700;
+    }
+    .badge-pending { background: rgba(217,119,6,0.12); color: var(--warning); }
+    .badge-confirmed { background: rgba(22,163,74,0.12); color: var(--success); }
+    .badge-cancelled { background: rgba(220,38,38,0.12); color: var(--danger); }
+    .badge-done { background: rgba(37,99,235,0.12); color: var(--info); }
+    .badge-approved { background: rgba(22,163,74,0.12); color: var(--success); }
+    .badge-pending-rev { background: rgba(217,119,6,0.12); color: var(--warning); }
+
+    .action-btn {
+      padding: 5px 12px; border-radius: 6px; border: none; cursor: pointer;
+      font-size: 0.78rem; font-weight: 700; font-family: 'Mukta', sans-serif;
+      transition: 0.2s; margin-right: 4px;
+    }
+    .btn-confirm { background: rgba(22,163,74,0.12); color: var(--success); }
+    .btn-confirm:hover { background: var(--success); color: white; }
+    .btn-cancel { background: rgba(220,38,38,0.12); color: var(--danger); }
+    .btn-cancel:hover { background: var(--danger); color: white; }
+    .btn-approve { background: rgba(22,163,74,0.12); color: var(--success); }
+    .btn-approve:hover { background: var(--success); color: white; }
+    .btn-done { background: rgba(37,99,235,0.1); color: var(--info); }
+    .btn-done:hover { background: var(--info); color: white; }
+
+    .tab-section { display: none; }
+    .tab-section.active { display: block; }
+
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--text-light); font-size: 0.9rem;
+    }
+    .empty-state .emoji { font-size: 3rem; margin-bottom: 12px; }
+
+    .loading-row td { text-align: center; padding: 40px; color: var(--text-light); }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); transition: 0.3s; }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 16px; }
+      .data-table { font-size: 0.8rem; }
+      .data-table th, .data-table td { padding: 10px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div style="font-size:3rem">🔐</div>
+    <h1>Admin Panel</h1>
+    <p>Ranwa Tent House Dashboard</p>
+    <input type="password" id="adminKeyInput" placeholder="Admin password dalein..." />
+    <button onclick="doLogin()">Login Karein</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- Admin App -->
+<div id="adminApp">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div style="font-size:2rem;margin-bottom:6px">🎪</div>
+      <h2>Ranwa Admin</h2>
+      <span>CHURU, RAJASTHAN</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="showTab('dashboard')">
+        <span class="icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="showTab('bookings')">
+        <span class="icon">📋</span> Bookings
+        <span class="badge" id="badgeBookings">0</span>
+      </div>
+      <div class="nav-item" onclick="showTab('contacts')">
+        <span class="icon">💬</span> Messages
+        <span class="badge" id="badgeContacts">0</span>
+      </div>
+      <div class="nav-item" onclick="showTab('reviews')">
+        <span class="icon">⭐</span> Reviews
+        <span class="badge" id="badgeReviews">0</span>
+      </div>
+      <div class="nav-item" onclick="showTab('gallery')">
+        <span class="icon">🖼️</span> Gallery
+      </div>
+      <div class="nav-item" onclick="window.open('/', '_blank')">
+        <span class="icon">🌐</span> View Website
+      </div>
+    </nav>
+    <div class="sidebar-logout">
+      <button onclick="logout()">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="main-header">
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="date" id="currentDate"></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button onclick="refreshAll()" style="padding:8px 16px;background:linear-gradient(135deg,var(--gold),#8B6914);border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:Mukta,sans-serif">🔄 Refresh</button>
+      </div>
+    </div>
+
+    <!-- Dashboard Tab -->
+    <div class="tab-section active" id="tab-dashboard">
+      <div class="stat-cards" id="statCards">
+        <div class="stat-card"><div class="sc-top"><span class="sc-icon">📋</span><span class="sc-label">Total Bookings</span></div><div class="sc-num" id="st-total">-</div><div class="sc-sub">All time</div></div>
+        <div class="stat-card"><div class="sc-top"><span class="sc-icon">⏳</span><span class="sc-label">Pending</span></div><div class="sc-num" id="st-pending">-</div><div class="sc-sub">Need attention</div></div>
+        <div class="stat-card"><div class="sc-top"><span class="sc-icon">✅</span><span class="sc-label">Confirmed</span></div><div class="sc-num" id="st-confirmed">-</div><div class="sc-sub">Ready to go</div></div>
+        <div class="stat-card"><div class="sc-top"><span class="sc-icon">💬</span><span class="sc-label">Unread Msgs</span></div><div class="sc-num" id="st-contacts">-</div><div class="sc-sub">Contact messages</div></div>
+        <div class="stat-card"><div class="sc-top"><span class="sc-icon">⭐</span><span class="sc-label">Pending Reviews</span></div><div class="sc-num" id="st-reviews">-</div><div class="sc-sub">Awaiting approval</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header"><h3>Latest Bookings</h3></div>
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Phone</th><th>Event</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="dashBookings"><tr class="loading-row"><td colspan="6">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Bookings Tab -->
+    <div class="tab-section" id="tab-bookings">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>All Bookings</h3>
+          <input type="text" class="search-input" placeholder="🔍 Search..." oninput="filterBookings(this.value)" />
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Event</th><th>Date</th><th>Guests</th><th>Services</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="bookingsTable"><tr class="loading-row"><td colspan="9">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacts Tab -->
+    <div class="tab-section" id="tab-contacts">
+      <div class="table-card">
+        <div class="table-header"><h3>Contact Messages</h3></div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Subject</th><th>Message</th><th>Date</th></tr></thead>
+            <tbody id="contactsTable"><tr class="loading-row"><td colspan="6">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews Tab -->
+    <div class="tab-section" id="tab-reviews">
+      <div class="table-card">
+        <div class="table-header"><h3>Reviews / Testimonials</h3></div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Name</th><th>Event</th><th>Rating</th><th>Review</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="reviewsTable"><tr class="loading-row"><td colspan="7">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gallery Tab -->
+  <div class="tab-section" id="tab-gallery">
+
+    <div class="table-card">
+
+      <div class="table-header">
+        <h3>Upload Gallery Image</h3>
+      </div>
+
+      <div style="padding:20px">
+
+        <input
+          type="text"
+          id="galleryTitle"
+          placeholder="Image title"
+          style="
+            width:100%;
+            padding:12px;
+            margin-bottom:12px;
+          "
+        />
+
+        <select
+          id="galleryCategory"
+          style="
+            width:100%;
+            padding:12px;
+            margin-bottom:12px;
+          "
+        >
+          <option value="wedding">Wedding</option>
+          <option value="birthday">Birthday</option>
+          <option value="tent">Tent</option>
+          <option value="corporate">Corporate</option>
+        </select>
+
+        <textarea
+          id="galleryDescription"
+          placeholder="Description"
+          style="
+            width:100%;
+            padding:12px;
+            margin-bottom:12px;
+            height:100px;
+          "
+        ></textarea>
+
+        <input
+          type="file"
+          id="galleryImage"
+          accept="image/*"
+          style="margin-bottom:16px"
+        />
+
+        <button
+          onclick="uploadGalleryImage()"
+          style="
+            padding:12px 24px;
+            border:none;
+            background:linear-gradient(135deg,var(--gold),#8B6914);
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:700;
+          "
+        >
+          📤 Upload Image
+        </button>
+
+        <div id="galleryUploadMsg" style="margin-top:12px"></div>
+
+      </div>
+
+    </div>
+      <!-- Gallery Images -->
+    <div class="table-card" style="margin-top:20px;">
+
+      <div class="table-header">
+        <h3>Gallery Images</h3>
+      </div>
+
+      <div
+        id="galleryAdminGrid"
+        style="
+          display:grid;
+          grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+          gap:20px;
+          padding:20px;
+        "
+      ></div>
+
+    </div>
+  </div>
+  </main>
+</div>
+
+<script>
+let ADMIN_KEY = '';
+let allBookings = [];
+
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+document.getElementById('adminKeyInput').addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
+
+async function doLogin() {
+  const key = document.getElementById('adminKeyInput').value.trim();
+  if (!key) return;
+  try {
+    const res = await fetch('/api/admin/stats', { headers: { 'x-admin-key': key } });
+    if (res.status === 403) { document.getElementById('loginError').textContent = 'Galat password! Try again.'; return; }
+    const data = await res.json();
+    if (data.success) {
+      ADMIN_KEY = key;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminApp').classList.add('visible');
+      updateStats(data.data);
+      loadAll();
+    }
+  } catch { document.getElementById('loginError').textContent = 'Server se connect nahi ho pa raha.'; }
+}
+
+function logout() { ADMIN_KEY = ''; location.reload(); }
+
+function showTab(tab) {
+  document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => { if (n.textContent.toLowerCase().includes(tab === 'dashboard' ? 'dashboard' : tab === 'bookings' ? 'booking' : tab === 'contacts' ? 'message' : 'review')) n.classList.add('active'); });
+  const titles = { dashboard: 'Dashboard', bookings: 'All Bookings', contacts: 'Contact Messages', reviews: 'Reviews & Testimonials' };
+  document.getElementById('pageTitle').textContent = titles[tab];
+}
+
+async function loadAll() {
+
+  await Promise.all([
+
+    loadStats(),
+    loadBookings(),
+    loadContacts(),
+    loadReviews()
+
+  ]);
+
+  loadGalleryAdmin();
+
+}
+
+async function refreshAll() { await loadAll(); }
+
+async function loadStats() {
+  try {
+    const res = await fetch('/api/admin/stats', { headers: { 'x-admin-key': ADMIN_KEY } });
+    const data = await res.json();
+    if (data.success) updateStats(data.data);
+  } catch {}
+}
+
+
+function updateStats(d) {
+  document.getElementById('st-total').textContent = d.total_bookings;
+  document.getElementById('st-pending').textContent = d.pending_bookings;
+  document.getElementById('st-confirmed').textContent = d.confirmed_bookings;
+  document.getElementById('st-contacts').textContent = d.unread_contacts;
+  document.getElementById('st-reviews').textContent = d.pending_reviews;
+  document.getElementById('badgeBookings').textContent = d.pending_bookings;
+  document.getElementById('badgeContacts').textContent = d.unread_contacts;
+  document.getElementById('badgeReviews').textContent = d.pending_reviews;
+}
+
+function statusBadge(s) {
+  const map = { pending: 'badge-pending', confirmed: 'badge-confirmed', cancelled: 'badge-cancelled', done: 'badge-done' };
+  return `<span class="badge ${map[s] || 'badge-pending'}">${s}</span>`;
+}
+
+async function loadBookings() {
+  try {
+    const res = await fetch('/api/admin/bookings', { headers: { 'x-admin-key': ADMIN_KEY } });
+    const data = await res.json();
+    allBookings = data.data || [];
+    renderBookings(allBookings);
+
+    // Dash preview: latest 5
+    const latest = allBookings.slice(0, 5);
+    document.getElementById('dashBookings').innerHTML = latest.length ? latest.map(b => `
+      <tr>
+        <td><strong>${b.name}</strong></td>
+        <td><a href="tel:${b.phone}" style="color:var(--gold);text-decoration:none">${b.phone}</a></td>
+        <td>${b.event_type}</td>
+        <td>${b.event_date}</td>
+        <td>${statusBadge(b.status)}</td>
+        <td>${b.status === 'pending' ? `<button class="action-btn btn-confirm" onclick="updateBooking(${b.id},'confirmed')">✅ Confirm</button>` : ''}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-light)">Koi booking nahi hai abhi</td></tr>';
+  } catch {}
+}
+
+function renderBookings(bookings) {
+  const tb = document.getElementById('bookingsTable');
+  tb.innerHTML = bookings.length ? bookings.map((b, i) => {
+    let services = [];
+    try { services = JSON.parse(b.services || '[]'); } catch {}
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${b.name}</strong><br/><small style="color:var(--text-light)">${new Date(b.created_at).toLocaleDateString('en-IN')}</small></td>
+      <td><a href="tel:${b.phone}" style="color:var(--gold);text-decoration:none;font-weight:700">${b.phone}</a></td>
+      <td>${b.event_type}</td>
+      <td>${b.event_date}</td>
+      <td>${b.guests || '-'}</td>
+      <td style="max-width:150px;font-size:0.78rem">${services.slice(0,2).join(', ')}${services.length > 2 ? '...' : ''}</td>
+      <td>${statusBadge(b.status)}</td>
+      <td>
+        ${b.status === 'pending' ? `<button class="action-btn btn-confirm" onclick="updateBooking(${b.id},'confirmed')">✅</button>` : ''}
+        ${b.status !== 'done' && b.status !== 'cancelled' ? `<button class="action-btn btn-done" onclick="updateBooking(${b.id},'done')">🏁</button>` : ''}
+        ${b.status !== 'cancelled' ? `<button class="action-btn btn-cancel" onclick="updateBooking(${b.id},'cancelled')">❌</button>` : ''}
+        <a href="tel:${b.phone}"><button class="action-btn" style="background:rgba(201,168,76,0.1);color:var(--gold)">📞</button></a>
+        <a href="https://wa.me/91${b.phone}?text=Namaste%20${encodeURIComponent(b.name)}%20ji!%20Ranwa%20Tent%20House%20se%20bol%20rahe%20hain.%20Aapki%20${encodeURIComponent(b.event_type)}%20booking%20ke%20baare%20mein%20baat%20karni%20thi." target="_blank"><button class="action-btn" style="background:rgba(37,211,102,0.1);color:#16a34a">💬</button></a>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-light)">Koi booking nahi</td></tr>';
+}
+
+function filterBookings(query) {
+  const q = query.toLowerCase();
+  const filtered = allBookings.filter(b =>
+    b.name?.toLowerCase().includes(q) || b.phone?.includes(q) || b.event_type?.toLowerCase().includes(q) || b.event_date?.includes(q)
+  );
+  renderBookings(filtered);
+}
+
+async function updateBooking(id, status) {
+  try {
+    await fetch(`/api/admin/bookings/${id}`, { method: 'PATCH', headers: { 'x-admin-key': ADMIN_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+    loadAll();
+  } catch {}
+}
+
+async function loadContacts() {
+  try {
+    const res = await fetch('/api/admin/contacts', { headers: { 'x-admin-key': ADMIN_KEY } });
+    const data = await res.json();
+    const contacts = data.data || [];
+    document.getElementById('contactsTable').innerHTML = contacts.length ? contacts.map((c, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td><strong>${c.name}</strong></td>
+        <td><a href="tel:${c.phone}" style="color:var(--gold);text-decoration:none;font-weight:700">${c.phone}</a></td>
+        <td>${c.subject || '-'}</td>
+        <td style="max-width:250px">${c.message}</td>
+        <td style="white-space:nowrap;font-size:0.8rem">${new Date(c.created_at).toLocaleDateString('en-IN')}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-light)">Koi message nahi</td></tr>';
+  } catch {}
+}
+
+async function loadReviews() {
+  try {
+    const res = await fetch('/api/admin/testimonials', { headers: { 'x-admin-key': ADMIN_KEY } });
+    const data = await res.json();
+    const reviews = data.data || [];
+    document.getElementById('reviewsTable').innerHTML = reviews.length ? reviews.map((r, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td><strong>${r.name}</strong></td>
+        <td>${r.event_type || '-'}</td>
+        <td>${'⭐'.repeat(r.rating || 5)}</td>
+        <td style="max-width:250px;font-size:0.85rem">${r.message}</td>
+        <td>${r.is_approved ? '<span class="badge badge-approved">Approved</span>' : '<span class="badge badge-pending-rev">Pending</span>'}</td>
+        <td>
+          ${!r.is_approved ? `<button class="action-btn btn-approve" onclick="approveReview(${r.id})">✅ Approve</button>` : ''}
+          <button class="action-btn btn-cancel" onclick="rejectReview(${r.id})">🗑️ Remove</button>
+        </td>
+      </tr>
+    `).join('') : '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-light)">Koi review nahi</td></tr>';
+  } catch {}
+}
+
+async function approveReview(id) {
+  await fetch(`/api/admin/testimonials/${id}`, { method: 'PATCH', headers: { 'x-admin-key': ADMIN_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ is_approved: 1 }) });
+  loadAll();
+}
+
+async function rejectReview(id) {
+  await fetch(`/api/admin/testimonials/${id}`, { method: 'PATCH', headers: { 'x-admin-key': ADMIN_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ is_approved: 0 }) });
+  loadAll();
+}
+async function uploadGalleryImage() {
+
+  const file =
+    document.getElementById('galleryImage').files[0];
+
+  if (!file) {
+    alert('Please select image');
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = async function() {
+
+    const image_data = reader.result;
+
+    const payload = {
+
+      title:
+        document.getElementById('galleryTitle').value,
+
+      category:
+        document.getElementById('galleryCategory').value,
+
+      description:
+        document.getElementById('galleryDescription').value,
+
+      image_data
+
+    };
+
+    try {
+
+      const res = await fetch('/api/admin/gallery', {
+
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': ADMIN_KEY
+        },
+
+        body: JSON.stringify(payload)
+
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById('galleryUploadMsg')
+          .innerHTML =
+            '<span style="color:green">✅ Image uploaded successfully</span>';
+
+        document.getElementById('galleryTitle').value = '';
+
+        document.getElementById('galleryCategory').value = 'wedding';
+
+        document.getElementById('galleryDescription').value = '';
+
+        document.getElementById('galleryImage').value = '';
+
+        loadGalleryAdmin();
+
+      }else {
+
+        document.getElementById('galleryUploadMsg')
+          .innerHTML =
+            '<span style="color:red">❌ Upload failed</span>';
+
+      }
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+  };
+
+  reader.readAsDataURL(file);
+
+}
+async function loadGalleryAdmin() {
+
+  try {
+
+    const res = await fetch('/api/gallery');
+
+    const data = await res.json();
+
+    if (data.success) {
+
+      document.getElementById('galleryAdminGrid')
+        .innerHTML = data.data.map(g => `
+
+        <div style="
+          background:white;
+          border-radius:14px;
+          overflow:hidden;
+          box-shadow:0 4px 20px rgba(0,0,0,0.08);
+        ">
+
+          <img
+            src="${g.image_url}"
+            style="
+              width:100%;
+              height:180px;
+              object-fit:cover;
+            "
+          />
+
+          <div style="padding:14px;">
+
+            <h4 style="margin-bottom:6px">
+              ${g.title || 'Gallery Image'}
+            </h4>
+
+            <p style="
+              color:#777;
+              font-size:0.82rem;
+              margin-bottom:12px;
+            ">
+              ${g.category}
+            </p>
+
+            <button
+              onclick="deleteGalleryImage(${g.id})"
+              style="
+                width:100%;
+                padding:10px;
+                border:none;
+                border-radius:8px;
+                background:#dc2626;
+                color:white;
+                cursor:pointer;
+                font-weight:700;
+              "
+            >
+              🗑 Delete
+            </button>
+
+          </div>
+
+        </div>
+
+      `).join('');
+
+    }
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
+
+}
+async function deleteGalleryImage(id) {
+
+  const ok =
+    confirm('Delete this image?');
+
+  if (!ok) return;
+
+  try {
+
+    const res = await fetch(
+
+      `/api/admin/gallery/${id}`,
+
+      {
+
+        method: 'DELETE',
+
+        headers: {
+          'x-admin-key': ADMIN_KEY
+        }
+
+      }
+
+    );
+
+    const data = await res.json();
+
+    if (data.success) {
+
+      loadGalleryAdmin();
+
+    }
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
+
+}
+</script>
+</body>
+</html>

@@ -222,7 +222,6 @@ app.get('*', (req, res) => {
   else res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🎪 Ranwa Tent House: http://localhost:${PORT}`);
-  console.log(`📊 Admin: http://localhost:${PORT}/admin  |  Key: ${process.env.ADMIN_KEY || 'ranwa2024admin'}\n`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
 });

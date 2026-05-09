@@ -82,6 +82,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
 
+app.use((req, res, next) => {
+  console.log('Request received:', req.url);
+  next();
+});
+
 app.get('/health', (req, res) => {
   res.status(200).send('Server is healthy');
 });
@@ -219,13 +224,18 @@ app.get('/api/admin/stats', async (req, res) => {
     }});
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
-app.get('/health', (req, res) => {
-  res.send('OK');
-});
+
+// app.get('/admin', (req, res) => {
+//   res.sendFile(path.join(__dirname, '../public/admin.html'));
+// });
 
 app.get('/', (req, res) => {
-  res.send('Website working');
+  res.send('Website working now');
 });
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, '../public/index.html'));
+// });
+
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);

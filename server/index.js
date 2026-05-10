@@ -317,7 +317,7 @@ app.get('*', (req, res) => {
   else res.sendFile(path.join(__dirname,'../public/index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log('\n🎪 Ranwa Tent House: http://localhost:' + PORT);
   console.log('📊 Admin: http://localhost:' + PORT + '/admin');
   console.log('🔑 Key: ' + (process.env.ADMIN_KEY || 'ranwa2024admin') + '\n');
